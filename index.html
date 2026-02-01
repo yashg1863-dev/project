@@ -11,20 +11,20 @@
         
         #main-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000000; /* Starts as Batman Black */
-            transition: background 2s ease-in-out;
+            background: #111; /* Initial dark color */
+            transition: background 1.5s ease-in-out;
             z-index: -2;
         }
 
         .screen {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; width: 100vw; text-align: center; position: absolute; transition: 0.8s ease-in-out;
+            height: 100vh; width: 100vw; text-align: center; position: absolute; transition: 0.5s ease-in-out;
             padding: 20px; box-sizing: border-box;
         }
 
-        .hidden { display: none; opacity: 0; pointer-events: none; }
+        .hidden { display: none !important; opacity: 0; pointer-events: none; }
 
-        h1 { font-family: 'Quicksand', sans-serif; font-size: 2.2rem; margin-bottom: 10px; color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        h1 { font-family: 'Quicksand', sans-serif; font-size: 2.2rem; margin-bottom: 10px; color: #ffffff; }
         p { font-weight: 300; opacity: 0.9; line-height: 1.6; max-width: 80%; }
 
         .btn {
@@ -33,7 +33,7 @@
             box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2); z-index: 100; margin-top: 20px;
         }
 
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255, 255, 255, 0.4); }
+        .btn:hover { transform: translateY(-3px); background: #f0f0f0; }
 
         .no-btn { background: transparent; border: 1px solid rgba(255,255,255,0.4); color: white; margin-left: 10px; }
 
@@ -52,18 +52,19 @@
 <body>
 
     <div id="main-bg"></div>
-    <audio id="bg-music" loop>
+    
+    <audio id="bg-music" preload="auto">
         <source src="music.mp3" type="audio/mpeg">
     </audio>
 
     <div id="page1" class="screen">
         <h1>Hi Jigisha</h1>
         <p>I know you're busy, but I wanted to send you something special.</p>
-        <button class="btn" onclick="start()">Open the message</button>
+        <button class="btn" onclick="startExperience()">Open the message</button>
     </div>
 
     <div id="page2" class="screen hidden">
-        <h1 style="color: #666;">"It's not who I am underneath..."</h1>
+        <h1 style="color: #888;">"It's not who I am underneath..."</h1>
         <p>...but what I do that defines me. <br><br> And what I'm doing is trying to be at least half as cool as Christian Bale's Batman to impress you.</p>
         <button class="btn" onclick="goToHamilton()">Next</button>
     </div>
@@ -77,4 +78,84 @@
     <div id="page4" class="screen hidden">
         <h1 style="color: #b886f8;">Will you be my Valentine? 💜</h1>
         <div style="margin-top: 30px; display: flex; align-items: center; justify-content: center; min-height: 200px; width: 100%;">
-            <button id="yes-btn" class="btn" onclick="sayYes()" style
+            <button id="yes-btn" class="btn" onclick="sayYes()" style="background: #6c4ab6; color: white;">YES</button>
+            <button id="no-btn" class="btn no-btn" onmouseover="moveNo()" onclick="moveNo()">No</button>
+        </div>
+    </div>
+
+    <div id="page5" class="screen hidden">
+        <h1 style="color: #b886f8;">Apobangpo! 💜</h1>
+        <p>I'm so glad you said yes. History has its eyes on us now!</p>
+    </div>
+
+    <script>
+        let count = 0;
+        const bg = document.getElementById('main-bg');
+        const music = document.getElementById('bg-music');
+        const noPhrases = ["Wait!", "I'm Batman.", "Smile more... say yes!", "Wrong button!", "Don't throw away your shot!"];
+
+        function showPage(pageId) {
+            // Hide all screens
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(s => s.classList.add('hidden'));
+            // Show the target screen
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+
+        function startExperience() {
+            // Restart and play music
+            music.currentTime = 0; 
+            music.play().catch(e => console.log("Audio play failed:", e));
+            
+            bg.style.background = "#050505"; // Batman Black
+            showPage('page2');
+        }
+
+        function goToHamilton() {
+            bg.style.background = "#1a1300"; // Hamilton Gold/Brown
+            showPage('page3');
+        }
+
+        function goToBTS() {
+            bg.style.background = "#1a0b2e"; // BTS Purple
+            showPage('page4');
+            setInterval(spawnHeart, 400);
+        }
+
+        function spawnHeart() {
+            const heart = document.createElement('div');
+            heart.innerHTML = "💜";
+            heart.classList.add('heart');
+            heart.style.left = Math.random() * 100 + "vw";
+            heart.style.animationDuration = (Math.random() * 3 + 2) + "s";
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 5000);
+        }
+
+        function moveNo() {
+            const no = document.getElementById('no-btn');
+            const yes = document.getElementById('yes-btn');
+            if (count < 5) {
+                no.style.position = 'absolute';
+                no.style.left = Math.random() * 70 + 15 + 'vw';
+                no.style.top = Math.random() * 70 + 15 + 'vh';
+                no.innerText = noPhrases[count];
+                let size = parseFloat(window.getComputedStyle(yes).fontSize);
+                yes.style.fontSize = (size * 1.2) + 'px';
+                count++;
+            } else {
+                no.style.display = 'none';
+            }
+        }
+
+        function sayYes() {
+            showPage('page5');
+            fetch('https://formspree.io/f/xgozaerv', {
+                method: 'POST',
+                body: JSON.stringify({ message: "Jigisha said YES!" }),
+                headers: { 'Accept': 'application/json' }
+            });
+        }
+    </script>
+</body>
+</html>
